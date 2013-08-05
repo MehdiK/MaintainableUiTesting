@@ -53,7 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyFixture.cs" />
+    <Compile Include="Host.cs" />
     <Compile Include="BrittleTests.cs" />
     <Compile Include="IisExpressWebServer.cs" />
     <Compile Include="ProjectLocation.cs" />
