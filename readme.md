@@ -72,19 +72,19 @@ What does a brittle test look like? It looks something like this:
         }
     }
 
-You can find [BrittleTest](	https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/BrittleTest.cs) class here and [Host](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Host.cs) is a static class, with a single static property `Instance`, which upon instantiation fires up IIS Express on the website under test and binds Firefox WebDriver to the browser instance.</small>
+You can find BrittleTest class [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/BrittleTest.cs) and [Host](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Host.cs) is a static class, with a single static property `Instance`, which upon instantiation fires up IIS Express on the website under test and binds Firefox WebDriver to the browser instance. 
 
 This test fires up web browser, goes to the home page of the Mvc Music Store website, registers a new user, browses to an album, adds it to the cart, and checks out. There are different schools of thoughts on UI tests and how much a test should cover. Some believe this test is doing too much and some think it's good. Nonetheless the size of the test is not the reason it's brittle; it's how it's written that makes it a nightmare to maintain. 
 
-So what is wrong with that code? 
+**So what is wrong with that code?**
 
  - This is procedural code. One of the main issues of this style of coding is readability or lack thereof. If you want to change the test or if it breaks because one of the involved pages has changed you will have a hard time figuring out what to change; because it's all a bit pile of code where we get the 'driver' to find an element on the page and to do something with it!
  - This one test on itself might not have much duplication but a few more tests like this and you will have a lot of duplicated selector and logic to interact with web pages from different tests. For example `By.Id("UserName")` selector will be duplicated in all tests that require registration, and `driver.FindElement(By.Id("UserName")).Clear();` and `driver.FindElement(By.Id("UserName")).SendKeys("<some user name>");` are duplicated anywhere you want to interact with UserName textbox. Then there is the whole registration form, and checkout form ETC that will be repeated in all tests needing to interact with them! Then the business asks me to change that to `UserName` to `Email` (this very same thing happened to me in a project about two years ago)! This simple change means too many broken tests because I have used UserName anywhere in my tests I needed registration.
  - There is a lot of magic strings everywhere. Even if I had used `UserName` in all my tests but instead of using magic strings I had somehow extracted that out into a single place and referenced that from everywhere I would really have to change where these "fields" were defined instead of everywhere in my code and then refactoring tools would allow me to simply rename the references.
  
-"What does it take to fix this test?", I hear you ask. A Magic Ingredient.
+"What does it take to fix this test?", I hear you ask. A "magic" ingredient is what we need.
 
-## The "Magic" Ingredient: Test Code Is Code!
+## The Magic Ingredient: Test Code Is Code!
 You either write tests or you don't. If you do, then much like your actual code, you are going have to maintain your tests. So give them the same treatment. What is it about tests that makes us think we can forego quality in them? If anything a bad test suite is going to take a lot longer to maintain than bad code. I have had bad peices of working code in production for years which never broke and I never had to touch them. Sure it was ugly as hell but it worked and it didn't need change. The situation is not quite the same for bad tests though: because bad tests are going to break and fixing them is going to be hard. 
 
 > If you have a test (good or bad) that never fails even in the face of change then you may as well delete it because it's not doing you any good.
@@ -190,7 +190,10 @@ A page object in it's root is nothing but a wrapper around the normal interactio
 
 a checkbox on the view becomes a bool property on the Page Object and ticking and untickying the checkbox is just a matter of setting that boolean property to true or false.
 
-I have created a Page superclass that includes takes care of a few things for us to further DRY our page objects.
+I have created a Page superclass that takes care of a few things for us and abstract some of the nitty gritty bits away from page objects.
+
+### Page Components!
+Page object is great as it encapsulates all the logic and selectors required to interact with a web page into one class; but some web pages are very big and complex. Earlier I said test code is code and we should treat it as such. We normally break big and complex web pages into smaller and in some cases reusable (partial) components. This allows us to compose a web page from smaller more manageable components. We should do the same for our test. To do this we can use Page Components. Page component is very much like a page object: it's a class that encapsulates interaction with some elements on a page. The difference is that it interacts with a small part of a web page. A good example for a page component is a menu bar. A menu bar usually appears on all pages of a web application. You don't really want to keep repeating the code required to interact with the menu in every single page object. Instead you can create a MenuComponent and use it from your page objects. You could also use page components to deal with grids of data on your pages, and to take it a step further the grid page component itself could be composed of grid row page components. 
 
 ## BDD and UI Testing - a match made in heaven
 UI testing works really well with Behavior Driven Development because you can write your UI tests based on the acceptance criteria provided (hopefully) by the business and BDD helps write the tests in a human readable way and [avoid a few pitfalls](http://www.mehdi-khalili.com/bdd-to-the-rescue).
