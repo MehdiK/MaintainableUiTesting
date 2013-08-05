@@ -3,7 +3,7 @@ using OpenQA.Selenium;
 
 namespace MvcMusicStore.FunctionalTests
 {
-    public class BrittleTests
+    public class BrittleTest
     {
         [Test]
         public void Can_buy_an_Album_when_registered()

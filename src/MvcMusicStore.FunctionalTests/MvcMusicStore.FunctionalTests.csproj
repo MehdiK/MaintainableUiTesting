@@ -54,8 +54,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Host.cs" />
-    <Compile Include="BrittleTests.cs" />
+    <Compile Include="BrittleTest.cs" />
     <Compile Include="IisExpressWebServer.cs" />
+    <Compile Include="Page.cs" />
+    <Compile Include="PageObject\Pages\AddressAndPaymentPage.cs" />
+    <Compile Include="PageObject\Pages\AlbumBrowsePage.cs" />
+    <Compile Include="PageObject\Pages\AlbumDetailPage.cs" />
+    <Compile Include="PageObject\Pages\HomePage.cs" />
+    <Compile Include="PageObject\Pages\LogonPage.cs" />
+    <Compile Include="PageObject\Pages\RegisterPage.cs" />
+    <Compile Include="PageObject\Pages\ShoppingCart.cs" />
+    <Compile Include="PageObject\TestWithPageObject.cs" />
     <Compile Include="ProjectLocation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SeleniumRunner.cs" />
