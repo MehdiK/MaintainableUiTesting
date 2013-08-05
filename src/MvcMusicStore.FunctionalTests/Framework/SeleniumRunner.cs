@@ -2,7 +2,7 @@
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Remote;
 
-namespace MvcMusicStore.FunctionalTests
+namespace MvcMusicStore.FunctionalTests.Framework
 {
     internal class SeleniumApplication
     {

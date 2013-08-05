@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using MvcMusicStore.FunctionalTests.Framework;
+using NUnit.Framework;
 using OpenQA.Selenium;
 
 namespace MvcMusicStore.FunctionalTests

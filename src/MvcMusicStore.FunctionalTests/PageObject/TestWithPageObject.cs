@@ -1,4 +1,5 @@
-﻿using MvcMusicStore.FunctionalTests.PageObject.Pages;
+﻿using MvcMusicStore.FunctionalTests.Framework;
+using MvcMusicStore.FunctionalTests.PageObject.Pages;
 using NUnit.Framework;
 
 namespace MvcMusicStore.FunctionalTests.PageObject

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace MvcMusicStore.FunctionalTests
+namespace MvcMusicStore.FunctionalTests.Framework
 {
     internal class IisExpressWebServer 
     {

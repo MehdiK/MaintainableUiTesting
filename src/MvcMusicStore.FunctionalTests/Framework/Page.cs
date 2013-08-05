@@ -1,7 +1,8 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using System;
-namespace MvcMusicStore.FunctionalTests
+
+namespace MvcMusicStore.FunctionalTests.Framework
 {
     public class Page
     {

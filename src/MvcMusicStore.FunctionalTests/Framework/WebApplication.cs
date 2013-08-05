@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MvcMusicStore.FunctionalTests
+namespace MvcMusicStore.FunctionalTests.Framework
 {
     public class WebApplication
     {
