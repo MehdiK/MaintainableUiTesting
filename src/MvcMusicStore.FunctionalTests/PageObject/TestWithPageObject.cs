@@ -1,18 +1,14 @@
-﻿using MvcMusicStore.FunctionalTests.Framework;
-using MvcMusicStore.FunctionalTests.PageObject.Pages;
+﻿using MvcMusicStore.FunctionalTests.PageObject.Pages;
 using NUnit.Framework;
 
 namespace MvcMusicStore.FunctionalTests.PageObject
 {
-    public class PageObject
+    public class TestWithPageObject
     {
         [Test]
         public void Can_buy_an_Album_when_registered()
         {
-            var driver = Host.Instance.WebDriver;
-            driver.Navigate().GoToUrl(driver.Url);
-            var homepage = new HomePage();
-            var registerPage = homepage
+            var registerPage = HomePage.Initiate()
                 .GoToAdminForAnonymousUser()
                 .GoToRegisterPage();
 
@@ -21,8 +17,8 @@ namespace MvcMusicStore.FunctionalTests.PageObject
             registerPage.Password = "!2345Qwert";
             registerPage.ConfirmPassword = "!2345Qwert";
 
-            homepage = registerPage.SubmitRegistration();
-            var shippingPage = homepage
+            var shippingPage = registerPage
+                .SubmitRegistration()
                 .SelectGenreByName("Disco")
                 .SelectAlbumByName("Le Freak")
                 .AddToCart()

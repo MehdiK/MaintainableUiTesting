@@ -5,6 +5,13 @@ namespace MvcMusicStore.FunctionalTests.PageObject.Pages
 {
     public class HomePage : Page
     {
+        public static HomePage Initiate()
+        {
+            var driver = Host.Instance.WebDriver;
+            driver.Navigate().GoToUrl(driver.Url);
+            return new HomePage();
+        }
+
         public LogonPage GoToAdminForAnonymousUser()
         {
             return NavigateTo<LogonPage>(By.LinkText("Admin"));
