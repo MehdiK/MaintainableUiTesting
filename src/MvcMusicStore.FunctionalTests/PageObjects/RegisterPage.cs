@@ -1,7 +1,7 @@
 using MvcMusicStore.FunctionalTests.Framework;
 using OpenQA.Selenium;
 
-namespace MvcMusicStore.FunctionalTests.PageObject.Pages
+namespace MvcMusicStore.FunctionalTests.PageObjects
 {
     public class RegisterPage : Page
     {
