@@ -8,7 +8,7 @@ namespace MvcMusicStore.FunctionalTests.StronglyTypedPageObjects
     {
         public Page SubmitShippingInfo(Order order, string promoCode)
         {
-            Model(order);
+            FillWith(order);
             SetText("PromoCode", promoCode);
             return NavigateTo<Page>(By.CssSelector("input[type=submit]"));
         }

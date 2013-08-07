@@ -8,7 +8,7 @@ namespace MvcMusicStore.FunctionalTests.StronglyTypedPageObjects
     {
         public HomePage CreateValidUser(RegisterModel model)
         {
-            Model(model);
+            FillWith(model);
             return NavigateTo<HomePage>(By.CssSelector("input[type='submit']"));
         }
     }

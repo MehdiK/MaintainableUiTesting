@@ -9,7 +9,7 @@ namespace MvcMusicStore.FunctionalTests.Framework
 {
     public class Page<TViewModel> : Page where TViewModel: class, new()
     {
-        public void Model(TViewModel viewModel, IDictionary<Type, Func<object, string>> propertyTypeHandling = null)
+        public void FillWith(TViewModel viewModel, IDictionary<Type, Func<object, string>> propertyTypeHandling = null)
         {
             var type = typeof(TViewModel);
 
