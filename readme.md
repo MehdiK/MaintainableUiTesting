@@ -86,9 +86,9 @@ One might argue this test is doing too much and that's why it's brittle. The siz
  - This one test on itself might not have much duplication but a few more tests like this and you will have a lot of duplicated selector and logic to interact with web pages from different tests. For example `By.Id("UserName")` selector will be duplicated in all tests that require registration, and `driver.FindElement(By.Id("UserName")).Clear()` and `driver.FindElement(By.Id("UserName")).SendKeys("<some user name>")` are duplicated anywhere you want to interact with UserName textbox. Then there is the whole registration form, and checkout form ETC that will be repeated in all tests needing to interact with them! With all the duplicated logic and selector all it takes to break a lot of tests is having to change `UserName` to `Email` (this very same thing happened to me in a project a few years ago)! 
  - There is a lot of magic strings everywhere. Even if I had used `UserName` in all my tests but instead of using magic strings I had somehow extracted that out into a single place and referenced that from every where I would really have to change where these "fields" were defined instead of every where in my code and then refactoring tools would allow me to simply rename the references.
  
-"What does it take to fix this test?", I hear you ask. A "magic" ingredient is what we need.
+"What does it take to fix this test?", I hear you ask. Just a mindset shift and believing that test code is code!
 
-## The Magic Ingredient: Test Code Is Code!
+## Test Code Is Code!
 You either write tests or you don't. If you do, then much like your actual code, you are going have to maintain your tests. So give them the same treatment. What is it about tests that makes us think we can forego quality in them? If anything, a bad test suite in my opinion is going to take a lot longer to maintain than bad code. I have had bad peices of working code in production for years which never broke and I never had to touch them. Sure it was ugly as hell but it worked and it didn't need change. The situation is not quite the same for bad tests though: because bad tests are going to break and fixing them is going to be hard. 
 
 So if you have to maintain your tests like you maintain your code, then you should give it some love. Test code is code. Do you apply [SRP](http://www.objectmentor.com/resources/articles/srp.pdf) on your code? Then you should apply it on your tests too. Is your code [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)? Then DRY up your tests too. If you don't write good tests (UI or otherwise) you will waste a lot of time maintaining them. I cannot even count the number of times I have seen developers avoid testing because they think writing tests is a huge waste of time because it takes too much time to maintain. 
@@ -242,13 +242,6 @@ We're not doing anything extraordinary here. Just simple refactoring on our test
 
 You can see the complete code for `Page` and `RegisterPage` classes [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Page.cs) and [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs).
 
-#### Don't stop at page object
-Some web pages are very big and complex. Earlier I said test code is code and we should treat it as such. We normally break big and complex web pages into smaller and in some cases reusable (partial) components. This allows us to compose a web page from smaller more manageable components. We should do the same for our tests. To do this we can use Page Components. 
-
-A Page Component is pretty much like a Page Object: it's a class that encapsulates interaction with some elements on a page. The difference is that it interacts with a small part of a web page: it models a user control or a partial view if you will. A good example for a page component is a menu bar. A menu bar usually appears on all pages of a web application. You don't really want to keep repeating the code required to interact with the menu in every single page object. Instead you can create a menu page component and use it from your page objects. You could also use page components to deal with grids of data on your pages, and to take it a step further the grid page component itself could be composed of grid row page components. In the case of Mvc Music Store we could have a `TopMenuComponent` and a `SideMenuComponent` and use them from our `HomePage`.
-
-Like in your web application, you could also create a, say, `LayoutPage` page object which models your layout/master page and use that as a superclass for all your other page objects. I guess a good rule of thumb would be to have a page component per partial view, a layout page object per layout and a page object per web page. That way you know your test code is as granualar and well composed as your code.
-
 ### Strongly Typed Page Object
 We resolved procedural issues with the brittle test which made the test more readable, modular, DRYer and effectively maintainable. There is one last issue we didn't fix: there is still a lot of magic strings everywhere. The name of the fields are hardcoded in the page objects. Not quite a nightmare but still an issue we could fix. Enter Strongly Typed Page Objects!
 
@@ -371,6 +364,13 @@ The `ObjectMother` class that I am using in the test is an [Object Mother](http:
             return model;
         }
     }
+
+### Don't stop at page object
+Some web pages are very big and complex. Earlier I said test code is code and we should treat it as such. We normally break big and complex web pages into smaller and in some cases reusable (partial) components. This allows us to compose a web page from smaller more manageable components. We should do the same for our tests. To do this we can use Page Components. 
+
+A Page Component is pretty much like a Page Object: it's a class that encapsulates interaction with some elements on a page. The difference is that it interacts with a small part of a web page: it models a user control or a partial view if you will. A good example for a page component is a menu bar. A menu bar usually appears on all pages of a web application. You don't really want to keep repeating the code required to interact with the menu in every single page object. Instead you can create a menu page component and use it from your page objects. You could also use page components to deal with grids of data on your pages, and to take it a step further the grid page component itself could be composed of grid row page components. In the case of Mvc Music Store we could have a `TopMenuComponent` and a `SideMenuComponent` and use them from our `HomePage`.
+
+Like in your web application, you could also create a, say, `LayoutPage` page object which models your layout/master page and use that as a superclass for all your other page objects. I guess a good rule of thumb would be to have a page component per partial view, a layout page object per layout and a page object per web page. That way you know your test code is as granualar and well composed as your code.
 
 ## Some Frameworks For UI Testing
 What I showed above was a very simple and contrived sample. I also created a fair few [supporting classes](https://github.com/MehdiK/MaintainableUiTesting/tree/master/src/MvcMusicStore.FunctionalTests/Framework) as infrastructure for tests. In reality the requirements for UI testing are a lot more complex than that: there are complex controls and interactions, you have to deal with network latencies and have control over AJAX and other Javascript interactions, need to fire off different browsers and so on which I didn't explain in this article. Although it's possible to code around these edge cases using some frameworks could make your UI tests easier to write. Here are the frameworks that I highly recommend:
