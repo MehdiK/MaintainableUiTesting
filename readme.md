@@ -72,7 +72,7 @@ So what does a brittle test look like? It looks something like this:
         }
     }
 
-<small>You can find BrittleTest class [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/BrittleTest.cs) and [Host](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Host.cs) is a static class, with a single static property `Instance`, which upon instantiation fires up IIS Express on the website under test and binds Firefox WebDriver to the browser instance. </small>
+<small>You can find `BrittleTest` class [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/BrittleTest.cs) and [Host](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Host.cs) is a static class, with a single static property `Instance`, which upon instantiation fires up IIS Express on the website under test and binds Firefox WebDriver to the browser instance. </small>
 
 This test fires up web browser, goes to the home page of the Mvc Music Store website, registers a new user, browses to an album, adds it to the cart, and checks out. 
 
@@ -104,7 +104,7 @@ Page Object is a pattern used to apply object orientation to UI tests. From the 
 
 The idea is that for each page in your application/website you want to create one Page Object. So Page Objects are basically the UI automation equivalent of your web pages. 
 
-I have gone ahead and refactored the logics and interactions out of the BrittleTest into a few page objects and created a new test that uses them instead of gitting the web driver directly. You can find the new test [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/TestWithPageObject.cs). The code is copied here for your reference:
+I have gone ahead and refactored the logics and interactions out of the BrittleTest into a few page objects and created a new test that uses them instead of gitting the web driver directly. You can find the new test [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjectTest.cs). The code is copied here for your reference:
 
     public class TestWithPageObject
     {
@@ -249,32 +249,144 @@ A Page Component is pretty much like a Page Object: it's a class that encapsulat
 
 Like in your web application, you could also create a, say, `LayoutPage` page object which models your layout/master page and use that as a superclass for all your other page objects. I guess a good rule of thumb would be to have a page component per partial view, a layout page object per layout and a page object per web page. That way you know your test code is as granualar and well composed as your code.
 
+### Strongly Typed Page Object
+We resolved procedural issues with the brittle test which made the test more readable, modular, DRYer and effectively maintainable. There is one last issue we didn't fix: there is still a lot of magic strings everywhere. The name of the fields are hardcoded in the page objects. Not quite a nightmare but still an issue we could fix. Enter Strongly Typed Page Objects!
 
-## Mix BDD in
-UI testing works really well with Behavior Driven Development because you can write your UI tests based on the acceptance criteria provided (hopefully) by the business and BDD helps write the tests in a human readable way and [avoid a few pitfalls](http://www.mehdi-khalili.com/bdd-to-the-rescue).
+This approach is practical if you're using an MV* framework for your UI. In our case we are using ASP.Net MVC. 
 
+Let's take a look another at the `RegisterPage`:
+
+    public class RegisterPage : Page
+    {
+        public HomePage SubmitRegistration()
+        {
+            return NavigateTo<HomePage>(By.CssSelector("input[type='submit']"));
+        }
+
+        public string Username          { set { SetText("UserName", value); } }
+        public string Email             { set { SetText("Email", value); } }
+        public string ConfirmPassword   { set { SetText("ConfirmPassword", value); } }
+        public string Password          { set { SetText("Password", value); } }
+    }
+
+This page models the [Register](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore/Views/Account/Register.cshtml) view in our web app. Just copying the top bit here for your convenience:
+
+	@model MvcMusicStore.Models.RegisterModel
+	
+	@{
+	    ViewBag.Title = "Register";
+	}
+
+Hmmm, what's that `RegisterModel` there? It's the View Model for the page: the `M` in the `MVC`. [Here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore/Models/AccountModels.cs#L41) is the code (I removed the attributes to reduce the noise):
+
+    public class RegisterModel
+    {
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
+
+That looks very familiar, doesn't it? It has the same properties as the `RegisterPage` class which is not surprising considering `RegisterPage` was created based on this view and view model. Let's see if we can take advantage of view models to simplify our page objects.
+
+I have created a new `Page` superclass; but a generic one. You can see the code [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Page%601.cs): 
+
+	public class Page<TViewModel> : Page where TViewModel: class, new()
+    {
+        public void FillWith(TViewModel viewModel, IDictionary<Type, Func<object, string>> propertyTypeHandling = null)
+        {	
+          // removed for brevity
+        }
+    }
+    
+The `Page<TViewModel>` class subclasses the old `Page` class and provides all it's functionality and it has one extra method called `FillWith` which fills in the page with provided view model instance! So now my `RegisterPage` class looks like:
+
+    public class RegisterPage : Page<RegisterModel>
+    {
+        public HomePage CreateValidUser(RegisterModel model)
+        {
+            FillWith(model);
+            return NavigateTo<HomePage>(By.CssSelector("input[type='submit']"));
+        }
+    }
+
+<small>I duplicated all page objects to show both variations and also to make the code easier to read; but in reality you will need one class for each page object.</small>
+
+After converting my page objects to [generic ones](https://github.com/MehdiK/MaintainableUiTesting/tree/master/src/MvcMusicStore.FunctionalTests/StronglyTypedPageObjects) now [the test](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/StronglyTypedPageObjectTest.cs) looks like:
+
+    public class StronglyTypedPageObjectWithComponent
+    {
+        [Test]
+        public void Can_buy_an_Album_when_registered()
+        {
+            var orderedPage = HomePage.Initiate()
+                .GoToAdminForAnonymousUser()
+                .GoToRegisterPage()
+                .CreateValidUser(ObjectMother.CreateRegisterModel())
+                .SelectGenreByName("Disco")
+                .SelectAlbumByName("Le Freak")
+                .AddAlbumToCart()
+                .Checkout()
+                .SubmitShippingInfo(ObjectMother.CreateShippingInfo(), "Free");
+
+            Assert.AreEqual("Checkout Complete", orderedPage.Title);
+        }
+    }
+
+That's it - the entire test! A lot more readable, DRY and maintainable, isn't it?
+
+The `ObjectMother` class that I am using in the test is an [Object Mother](http://martinfowler.com/bliki/ObjectMother.html) that provides test data (code can be found [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/StronglyTypedPageObjectTest.cs#L26
+)), nothing fancy:
+
+    public class ObjectMother
+    {
+        public static Order CreateShippingInfo()
+        {
+            var shippingInfo = new Order
+            {
+                FirstName = "Homer",
+                LastName = "Simpson",
+                Address = "742 Evergreen Terrace",
+                City = "Springfield",
+                State = "Kentucky",
+                PostalCode = "123456",
+                Country = "United States",
+                Phone = "2341231241",
+                Email = "chunkylover53@aol.com"
+            };
+
+            return shippingInfo;
+        }
+
+        public static RegisterModel CreateRegisterModel()
+        {
+            var model = new RegisterModel
+            {
+                UserName = "HJSimpson",
+                Email = "chunkylover53@aol.com",
+                Password = "!2345Qwert",
+                ConfirmPassword = "!2345Qwert"
+            };
+            
+            return model;
+        }
+    }
 
 ## Some Frameworks For UI Testing
-Although the patterns are platform agnostic using some frameworks could make your UI tests easier to write. Here are the frameworks that I highly recommend:
+What I showed above was a very simple and contrived sample. I also created a fair few [supporting classes](https://github.com/MehdiK/MaintainableUiTesting/tree/master/src/MvcMusicStore.FunctionalTests/Framework) as infrastructure for tests. In reality the requirements for UI testing are a lot more complex than that: there are complex controls and interactions, you have to deal with network latencies and have control over AJAX and other Javascript interactions, need to fire off different browsers and so on which I didn't explain in this article. Although it's possible to code around these edge cases using some frameworks could make your UI tests easier to write. Here are the frameworks that I highly recommend:
 
-**Browser automation:**
+**Frameworks for .Net:**
 
- - [Selenium](http://docs.seleniumhq.org/) simply automates browsers
- - [PhantomJS](http://phantomjs.org/): a headless WebKit with JavaScript API
-
-**.Net testing frameworks:**
-
- - [Seleno](http://teststack.github.com/pages/Seleno.html) for testing web applications
- - [White](http://teststack.github.com/pages/white.html) for rich client applications
+ - [Seleno](https://github.com/TestStack/TestStack.Seleno) is an open source project from [TestStack](http://teststack.net/) which helps you write automated UI tests with Selenium. It focuses on the use of Page Objects and Page Components and by reading from and writing to web pages using strongly typed view models. Most of the code shown in this article were borrowed from Seleno codebase.
+ - [White](https://github.com/TestStack/White) is a framework for automating rich client applications based on Win32, WinForms, WPF, Silverlight and SWT (Java) platforms.
  
-And for BDD:
-  
- - [BDDfy](http://teststack.github.com/TestStack.BDDfy/) if you don't want [executable specs](http://mehdi-khalili.com/executable-requirements)
- - [SpecFlow](http://www.specflow.org/specflownew/) if you want executable specs
-
-**Ruby testing frameworks:**
+**Frameworks for Ruby:**
  
- - [Capybara](https://github.com/jnicklas/capybara) for testing web applications.
- - [Poltergeist](https://github.com/jonleighton/poltergeist): a PhantomJS driver for Capybara
- - [Cucumber](http://cukes.info/) for BDD
+ - [Capybara](https://github.com/jnicklas/capybara) is acceptance test framework for web applications that helps you test web applications by simulating how a real user would interact with your app. 
+ - [Poltergeist](https://github.com/jonleighton/poltergeist) is a driver for Capybara. It allows you to run your Capybara tests on a headless WebKit browser, provided by [PhantomJS](http://www.phantomjs.org/).
+ - [page-object](https://github.com/cheezy/page-object) is a simple gem that assists in creating flexible page objects for testing browser based applications. The goal is to facilitate creating abstraction layers in your tests to decouple the tests from the item they are testing and to provide a simple interface to the elements on a page. It works with both watir-webdriver and selenium-webdriver. I haven't personally used this gem.
+ 
+##Conclusion
+We started with a typical UI automation experience, went over a brittle test and discussed it's issues and resolved them using a few ideas and patterns. If you want to take one point from this article it should be: **Test Code Is Code**. If you think about it, all I did in this article was to apply the good coding and object oriented practices you already know about on a UI test.
 
+There is still a lot to learn about UI testing and I will try to discuss some of more advanced tips in a future article. 
