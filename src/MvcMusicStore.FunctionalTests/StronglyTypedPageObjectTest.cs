@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace MvcMusicStore.FunctionalTests
 {
-    public class StronglyTypedPageObjectWithComponent
+    public class StronglyTypedPageObjectTest
     {
         [Test]
         public void Can_buy_an_Album_when_registered()
