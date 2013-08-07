@@ -3,7 +3,7 @@ using OpenQA.Selenium;
 
 namespace MvcMusicStore.FunctionalTests.PageObjects
 {
-    public class ShoppingCart : Page
+    public class ShoppingCartPage : Page
     {
         public AddressAndPaymentPage Checkout()
         {
