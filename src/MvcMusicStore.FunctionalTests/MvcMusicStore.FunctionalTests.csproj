@@ -38,6 +38,7 @@
       <HintPath>..\packages\NUnit.2.6.2\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -57,6 +58,7 @@
     <Compile Include="Framework\Host.cs" />
     <Compile Include="Framework\IisExpressWebServer.cs" />
     <Compile Include="Framework\Page.cs" />
+    <Compile Include="Framework\Page`1.cs" />
     <Compile Include="Framework\ProjectLocation.cs" />
     <Compile Include="Framework\SeleniumRunner.cs" />
     <Compile Include="Framework\WebApplication.cs" />
@@ -68,7 +70,15 @@
     <Compile Include="PageObjects\RegisterPage.cs" />
     <Compile Include="PageObjects\ShoppingCartPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestWithPageObject.cs" />
+    <Compile Include="StronglyTypedPageObjects\AddressAndPaymentPage.cs" />
+    <Compile Include="StronglyTypedPageObjects\AlbumBrowsePage.cs" />
+    <Compile Include="StronglyTypedPageObjects\AlbumDetailPage.cs" />
+    <Compile Include="StronglyTypedPageObjects\HomePage.cs" />
+    <Compile Include="StronglyTypedPageObjects\LogonPage.cs" />
+    <Compile Include="StronglyTypedPageObjects\RegisterPage.cs" />
+    <Compile Include="StronglyTypedPageObjects\ShoppingCartPage.cs" />
+    <Compile Include="StronglyTypedPageObjectTest.cs" />
+    <Compile Include="PageObjectTest.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

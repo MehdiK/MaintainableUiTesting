@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace MvcMusicStore.FunctionalTests
 {
-    public class TestWithPageObject
+    public class PageObjectTest
     {
         [Test]
         public void Can_buy_an_Album_when_registered()
