@@ -153,7 +153,7 @@ we can write
 
 	registerPage.Email = "chunkylover53@aol.com";
 
-where `registerPage` is an instance of the [RegisterPage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs). Likewise a link on the web page becomes a method on the Page Object and clicking the link turns into calling the method on the Page Object. So instead of
+where `registerPage` is an instance of the [RegisterPage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs). A checkbox on the page becomes a bool property on the Page Object and ticking and untickying the checkbox is just a matter of setting that boolean property to true or false. Likewise a link on the web page becomes a method on the Page Object and clicking the link turns into calling the method on the Page Object. So instead of
 
     driver.FindElement(By.LinkText("Admin")).Click();
  
@@ -172,8 +172,8 @@ In fact any action on our web page becomes a method in our page object and in re
 
 On an instance of the [HomePage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/HomePage.cs) class I call `SelectGenreByName` which clicks on a 'Disco' link on the page which returns an instance of [AlbumBrowsePage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/AlbumBrowsePage.cs) and then on that page I call `SelectAlbumByName` which clicks on the 'Le Freak' album and returns an instance of [AlbumDetailsPage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/AlbumDetailPage.cs) and on that page I click the `AddToCart` button which adds the CD to my shopping cart and takes me to the shopping cart where I can `Checkout`. I admit it it is a lot of classes for what used to be no class at all; but we gained a lot of benefits from this practice. Firstly the code is no longer procedural. We have a well contained testing model where each object provides nice encapsulation of interaction with a page. So for example if something changes in your registration logic the only place you have to change is your RegisterPage class instead of having to go through your entire test suite and change every single interaction with the registration view. This modularity also provides for nice reuse; for example you can reuse your Shopping Cart page everywhere you need to interact with the shopping cart. So in a simple practice of moving from procedural to object oriented test code we **almost** eliminated three of the four issues with the initial brittle test which were procedural code, and logic and selector duplication. We still have a little bit of duplication though which we will fix shortly.
 
-**How did we actually implemented those page objects?** 
-A page object in it's root is nothing but a wrapper around the normal interaction you have with the page. So in your implementation you could just extract UI interactions our of the brittle tests and put them into their own page objects. For example you could write a RegisterPage that looked like this:
+**How did we actually implement those page objects?** 
+A page object in it's root is nothing but a wrapper around the interactions you have with the page. So in your implementation you could just extract UI interactions our of the brittle tests and put them into their own page objects. For example you could write a RegisterPage that looked like this:
 
     public class RegisterPage : Page
     {
@@ -188,14 +188,69 @@ A page object in it's root is nothing but a wrapper around the normal interactio
         public string Password          { set { Execute(By.Name("Password"), e => { e.Clear(); e.SendKeys(value);}); } }
     }
 
-a checkbox on the view becomes a bool property on the Page Object and ticking and untickying the checkbox is just a matter of setting that boolean property to true or false.
+I have created a `Page` superclass that takes care of a few things, like `NavigateTo` which helps navigate to a new page by taking an action and `Execute` that executes some actions on an element, and abstracts some of the nitty gritty bits away from page objects:
 
-I have created a Page superclass that takes care of a few things for us and abstract some of the nitty gritty bits away from page objects.
+    public class Page
+    {
+        protected RemoteWebDriver WebDriver
+        {
+            get { return Host.Instance.WebDriver; }
+        }
 
-### Page Components!
-Page object is great as it encapsulates all the logic and selectors required to interact with a web page into one class; but some web pages are very big and complex. Earlier I said test code is code and we should treat it as such. We normally break big and complex web pages into smaller and in some cases reusable (partial) components. This allows us to compose a web page from smaller more manageable components. We should do the same for our test. To do this we can use Page Components. Page component is very much like a page object: it's a class that encapsulates interaction with some elements on a page. The difference is that it interacts with a small part of a web page. A good example for a page component is a menu bar. A menu bar usually appears on all pages of a web application. You don't really want to keep repeating the code required to interact with the menu in every single page object. Instead you can create a MenuComponent and use it from your page objects. You could also use page components to deal with grids of data on your pages, and to take it a step further the grid page component itself could be composed of grid row page components. 
+        public string Title { get { return WebDriver.Title; }}
 
-## BDD and UI Testing - a match made in heaven
+        public TPage NavigateTo<TPage>(By by) where TPage:Page, new()
+        {
+            WebDriver.FindElement(by).Click();
+            return Activator.CreateInstance<TPage>();
+        }
+
+        public void Execute(By by, Action<IWebElement> action)
+        {
+            var element = WebDriver.FindElement(by);
+            action(element);
+        }
+    }
+
+The `Execute` method apart from abstracting web driver's interaction has an added benefit that allows selecting an element, which could be an expensive action, once and taking multiple actions on it. In the `BrittleTest` to interact with an element we did `FindElement` once per action while with `Execute` the element is selected once and used many times which could improve your test performance:
+
+    driver.FindElement(By.Id("Password")).Clear();
+    driver.FindElement(By.Id("Password")).SendKeys("!2345Qwert");
+
+was replaced with 
+
+    Execute(By.Name("Password"), e => { e.Clear(); e.SendKeys("!2345Qwert");})
+
+Taking a second look at the `RegisterPage` page object we still have a bit of duplication in there. Test code is code and we don't want duplication in our code; so let's refactor that. We can extract the code required to fill in a textbox into a method on the `Page` class and just call that from page objects. The method could be implemented as:
+
+    public void SetText(string elementName, string newText)
+    {
+        Execute(By.Name(elementName), e =>
+            {
+                e.Clear();
+                e.SendKeys(newText);
+            } );
+    }
+
+And now the properties on `RegisterPage` can be shrunk to:
+    
+    public string Username { set { SetText("UserName", value); } }
+
+You could also make a fluent API for it to make the setter read better (e.g. `Fill("UserName").With(value)`) but I'll leave that to you.
+
+We're not doing anything extraordinary here. Just simple refactoring on our test code like we've always done for our "other" code!!
+
+You can see the complete code for `Page` and `RegisterPage` classes [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/Framework/Page.cs) and [here](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs).
+
+#### Don't stop at page object
+Some web pages are very big and complex. Earlier I said test code is code and we should treat it as such. We normally break big and complex web pages into smaller and in some cases reusable (partial) components. This allows us to compose a web page from smaller more manageable components. We should do the same for our tests. To do this we can use Page Components. 
+
+A Page Component is pretty much like a Page Object: it's a class that encapsulates interaction with some elements on a page. The difference is that it interacts with a small part of a web page: it models a user control or a partial view if you will. A good example for a page component is a menu bar. A menu bar usually appears on all pages of a web application. You don't really want to keep repeating the code required to interact with the menu in every single page object. Instead you can create a menu page component and use it from your page objects. You could also use page components to deal with grids of data on your pages, and to take it a step further the grid page component itself could be composed of grid row page components. In the case of Mvc Music Store we could have a `TopMenuComponent` and a `SideMenuComponent` and use them from our `HomePage`.
+
+Like in your web application, you could also create a, say, `LayoutPage` page object which models your layout/master page and use that as a superclass for all your other page objects. I guess a good rule of thumb would be to have a page component per partial view, a layout page object per layout and a page object per web page. That way you know your test code is as granualar and well composed as your code.
+
+
+## Mix BDD in
 UI testing works really well with Behavior Driven Development because you can write your UI tests based on the acceptance criteria provided (hopefully) by the business and BDD helps write the tests in a human readable way and [avoid a few pitfalls](http://www.mehdi-khalili.com/bdd-to-the-rescue).
 
 
