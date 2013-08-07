@@ -24,5 +24,14 @@ namespace MvcMusicStore.FunctionalTests.Framework
             var element = WebDriver.FindElement(by);
             action(element);
         }
+
+        public void SetText(string elementName, string newText)
+        {
+            Execute(By.Name(elementName), e =>
+                {
+                    e.Clear();
+                    e.SendKeys(newText);
+                } );
+        }
     }
 }
