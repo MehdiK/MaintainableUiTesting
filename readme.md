@@ -85,7 +85,7 @@ One might argue this test is doing too much and that's why it's brittle; but the
 ## Test Code Is Code!
 **Much like your actual code, you are going have to maintain your tests. So give them the same treatment. **
 
-What is it about tests that makes us think we can forego quality in them? If anything, a bad test suite in my opinion is a lot harder to maintain than bad code. I have had bad peices of working code in production for years which never broke and I never had to touch them. Sure it was ugly as hell but it worked and it didn't need change. The situation is not quite the same for bad tests though: because bad tests are going to break and fixing them is going to be hard. I cannot count the number of times I have seen developers avoid testing because they think writing tests is a huge waste of time because it takes too much time to maintain. 
+What is it about tests that makes us think we can forego quality in them? If anything, a bad test suite in my opinion is a lot harder to maintain than bad code. I have had bad pieces of working code in production for years which never broke and I never had to touch them. Sure it was ugly as hell but it worked and it didn't need change. The situation is not quite the same for bad tests though: because bad tests are going to break and fixing them is going to be hard. I cannot count the number of times I have seen developers avoid testing because they think writing tests is a huge waste of time because it takes too much time to maintain. 
 
 **Test code is code**: <br /> 
 Do you apply [SRP](http://www.objectmentor.com/resources/articles/srp.pdf) on your code? Then you should apply it on your tests too. Is your code [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)? Then DRY up your tests too. If you don't write good tests (UI or otherwise) you will waste a lot of time maintaining them. 
@@ -150,7 +150,7 @@ we can write
 
 	registerPage.Email = "chunkylover53@aol.com";
 
-where `registerPage` is an instance of the [RegisterPage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs) class. A checkbox on the page becomes a bool property on the Page Object and ticking and untickying the checkbox is just a matter of setting that boolean property to true or false. Likewise a link on the web page becomes a method on the Page Object and clicking the link turns into calling the method on the Page Object. So instead of
+where `registerPage` is an instance of the [RegisterPage](https://github.com/MehdiK/MaintainableUiTesting/blob/master/src/MvcMusicStore.FunctionalTests/PageObjects/RegisterPage.cs) class. A checkbox on the page becomes a bool property on the Page Object and ticking and unticking the checkbox is just a matter of setting that boolean property to true or false. Likewise a link on the web page becomes a method on the Page Object and clicking the link turns into calling the method on the Page Object. So instead of
 
     driver.FindElement(By.LinkText("Admin")).Click();
  
