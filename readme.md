@@ -377,7 +377,7 @@ What I showed above was a very simple and contrived sample with a few [supportin
  - [Seleno](https://github.com/TestStack/TestStack.Seleno) is an open source project from [TestStack](http://teststack.net/) which helps you write automated UI tests with Selenium. It focuses on the use of Page Objects and Page Components and by reading from and writing to web pages using strongly typed view models. If you liked what I did in this article, then you will also like Seleno as most of the code shown here was borrowed from the Seleno codebase.
  - [White](https://github.com/TestStack/White) is an open source framework from [TestStack](http://teststack.net/) for automating rich client applications based on Win32, WinForms, WPF, Silverlight and SWT (Java) platforms.
  
-Disclosure: I am a co-founder of TestStack organization and a member of the development team.
+Disclosure: I am a co-founder and a member of the development team in the TestStack organization.
 
 **Frameworks for Ruby:**
  
