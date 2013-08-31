@@ -14,15 +14,12 @@ namespace MvcMusicStore.FunctionalTests.Framework
             _application = application;
         }
 
-        public void Start(Dictionary<string, string> environmentVariables = null)
+        public void Start(params KeyValuePair<string, string>[] environmentVariables)
         {
             var webHostStartInfo = ProcessStartInfo(_application.Location.FullPath, _application.PortNumber);
 
-            if (environmentVariables != null)
-            {
-                foreach (var variable in environmentVariables)
-                    webHostStartInfo.EnvironmentVariables.Add(variable.Key, variable.Value);
-            }
+            foreach (var variable in environmentVariables)
+                webHostStartInfo.EnvironmentVariables.Add(variable.Key, variable.Value);
 
             _webHostProcess = Process.Start(webHostStartInfo);
         }
