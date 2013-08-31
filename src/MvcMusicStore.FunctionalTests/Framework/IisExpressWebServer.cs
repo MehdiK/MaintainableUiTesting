@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace MvcMusicStore.FunctionalTests.Framework
@@ -13,9 +14,16 @@ namespace MvcMusicStore.FunctionalTests.Framework
             _application = application;
         }
 
-        public void Start()
+        public void Start(Dictionary<string, string> environmentVariables = null)
         {
             var webHostStartInfo = ProcessStartInfo(_application.Location.FullPath, _application.PortNumber);
+
+            if (environmentVariables != null)
+            {
+                foreach (var variable in environmentVariables)
+                    webHostStartInfo.EnvironmentVariables.Add(variable.Key, variable.Value);
+            }
+
             _webHostProcess = Process.Start(webHostStartInfo);
         }
 
