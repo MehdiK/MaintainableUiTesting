@@ -11,19 +11,42 @@ namespace MvcMusicStore.FunctionalTests.Framework
             get { return Host.Instance.WebDriver; }
         }
 
-        public string Title { get { return WebDriver.Title; }}
+        private void Capture()
+        {
+            var capturer = new Capturer(WebDriver);
+            capturer.CaptureScreenshot();
+            capturer.CapturePageSource();
+        }
 
         public TPage NavigateTo<TPage>(By by) where TPage:Page, new()
         {
-            WebDriver.FindElement(by).Click();
-            return Activator.CreateInstance<TPage>();
+            try
+            {
+                WebDriver.FindElement(by).Click();
+                return Activator.CreateInstance<TPage>();
+            }
+            catch
+            {
+                //Capture();
+                throw;
+            }
         }
 
         public void Execute(By by, Action<IWebElement> action)
         {
-            var element = WebDriver.FindElement(by);
-            action(element);
+            try
+            {
+                var element = WebDriver.FindElement(by);
+                action(element);
+            }
+            catch
+            {
+                //Capture();
+                throw;
+            }
         }
+
+        public string Title { get { return WebDriver.Title; } }
 
         public void SetText(string elementName, string newText)
         {

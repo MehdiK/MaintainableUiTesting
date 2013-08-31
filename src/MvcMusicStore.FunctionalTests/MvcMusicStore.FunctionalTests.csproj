@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrittleTest.cs" />
+    <Compile Include="Framework\Capturer.cs" />
     <Compile Include="Framework\Host.cs" />
     <Compile Include="Framework\IisExpressWebServer.cs" />
     <Compile Include="Framework\Page.cs" />
