@@ -27,7 +27,7 @@ namespace MvcMusicStore.FunctionalTests.Framework
             }
             catch
             {
-                //Capture();
+                Capture();
                 throw;
             }
         }
@@ -41,7 +41,7 @@ namespace MvcMusicStore.FunctionalTests.Framework
             }
             catch
             {
-                //Capture();
+                Capture();
                 throw;
             }
         }
