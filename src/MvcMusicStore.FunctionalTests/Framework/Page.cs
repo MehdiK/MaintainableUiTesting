@@ -71,5 +71,11 @@ namespace MvcMusicStore.FunctionalTests.Framework
                 throw;
             }
         }
+
+        public void WaitForAjax(int secondsToWait = 10)
+        {
+            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(secondsToWait));
+            wait.Until(d => (bool)((IJavaScriptExecutor)d).ExecuteScript("return jQuery.active == 0"));
+        }
     }
 }
