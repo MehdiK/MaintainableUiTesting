@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
 using System;
+using OpenQA.Selenium.Support.UI;
 
 namespace MvcMusicStore.FunctionalTests.Framework
 {
@@ -55,6 +56,20 @@ namespace MvcMusicStore.FunctionalTests.Framework
                     e.Clear();
                     e.SendKeys(newText);
                 } );
+        }
+
+        public IWebElement FindElementWithWait(By by, int secondsToWait = 10)
+        {
+            try
+            {
+                var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(secondsToWait));
+                return wait.Until(d => d.FindElement(by));
+            }
+            catch
+            {
+                Capture();
+                throw;
+            }
         }
     }
 }

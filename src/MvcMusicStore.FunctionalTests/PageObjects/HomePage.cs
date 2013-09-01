@@ -1,4 +1,5 @@
-﻿using MvcMusicStore.FunctionalTests.Framework;
+﻿using System;
+using MvcMusicStore.FunctionalTests.Framework;
 using OpenQA.Selenium;
 
 namespace MvcMusicStore.FunctionalTests.PageObjects
@@ -8,6 +9,7 @@ namespace MvcMusicStore.FunctionalTests.PageObjects
         public static HomePage Initiate()
         {
             var driver = Host.Instance.WebDriver;
+            Host.Instance.WebDriver.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(5));
             driver.Navigate().GoToUrl(driver.Url);
             return new HomePage();
         }
