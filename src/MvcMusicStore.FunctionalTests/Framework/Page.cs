@@ -74,8 +74,16 @@ namespace MvcMusicStore.FunctionalTests.Framework
 
         public void WaitForAjax(int secondsToWait = 10)
         {
-            var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(secondsToWait));
-            wait.Until(d => (bool)((IJavaScriptExecutor)d).ExecuteScript("return jQuery.active == 0"));
+            try
+            {
+                var wait = new WebDriverWait(WebDriver, TimeSpan.FromSeconds(secondsToWait));
+                wait.Until(d => (bool) ((IJavaScriptExecutor) d).ExecuteScript("return jQuery.active == 0"));
+            }
+            catch
+            {
+                Capture();
+                throw;
+            }
         }
     }
 }
